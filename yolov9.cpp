@@ -275,7 +275,7 @@ void Yolov9::draw_bboxes(cv::Mat& frame, const std::vector<Detection>& output)
             box.height = box.height / r_w;
         }
         else 
-{
+        {
             box.x = box.x / r_h;
             box.y = box.y / r_h;
             box.width = box.width / r_h;
