@@ -36,5 +36,5 @@ cmake --build . --config Release
 
 ## Tested Environment
    - TensorRT 8.6
-   - CUDA 11.6
+   - CUDA 11.8
    - Windows 10
