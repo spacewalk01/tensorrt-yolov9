@@ -84,7 +84,6 @@ int main(int argc, char** argv)
         while (1)
         {
             cv::Mat frame;
-            cv::Mat show_frame;
             cap >> frame;
 
             if (frame.empty()) break;
