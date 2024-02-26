@@ -4,8 +4,8 @@
 3. Convert the model to onnx format:
 
 - Copy `general.y` in this repo to `utils/general.py` in yolov9 installation folder
-- Then copy `export.py` in this repo to yolov9 installation folder
-- Export the model
+- Copy `export.py` in this repo to yolov9 installation folder
+- Then export the model
 ``` shell
 python export.py --weights yolov9-c.pt --include onnx
 ```
