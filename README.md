@@ -34,5 +34,5 @@ This project is based on the following awesome projects:
 - [TensorRT](https://github.com/NVIDIA/TensorRT/tree/release/8.6/samples) - TensorRT samples and api documentation.
 - [TensorRTx](https://github.com/wang-xinyu/tensorrtx) - Implementation of popular deep learning networks with TensorRT network definition API.
 
-If you find it interesting, then also take a look at the extension of this work [Yolov9-Bytetrack](https://github.com/spacewalk01/yolov9-bytetrack-tensorrt).
-
+## 🔗 See also
+- [Yolov9-Bytetrack](https://github.com/spacewalk01/yolov9-bytetrack-tensorrt) - Integration of YOLOv9 with ByteTracker using the TensorRT API.
