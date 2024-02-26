@@ -220,7 +220,7 @@ void Yolov9::postprocess(std::vector<Detection>& output)
         double score;
         cv::minMaxLoc(classes_scores, nullptr, &score, nullptr, &class_id_point);
 
-        if (score > 0.1) {
+        if (score > mParams.confThreshold) {
             const float cx = det_output.at<float>(0, i);
             const float cy = det_output.at<float>(1, i);
             const float ow = det_output.at<float>(2, i);
