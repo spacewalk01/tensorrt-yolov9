@@ -18,6 +18,8 @@ struct YoloParams
 {
     float confThreshold = 0.3;
     float nmsThreshold = 0.4;
+    int kMaxInputImageSize = 4096 * 4096;
+
 };
 
 class Yolov9
@@ -37,27 +39,11 @@ private:
 
     YoloParams mParams;
 
-    Mat resizeImage(Mat& img, int inputWidth, int inputHeight);
-
-    void build(string onnxPath, bool isFP16 = false);
-
-    bool saveEngine(const std::string& fileName);
-
     void deserializeEngine(string enginePath);
 
     void initialize();
 
     size_t getSizeByDim(const Dims& dims);
-
-    void memcpyBuffers(const bool copyInput, const bool deviceToHost, const bool async, const cudaStream_t& stream = 0);
-
-    void copyInputToDeviceAsync(const cudaStream_t& stream = 0);
-
-    void copyOutputToHostAsync(const cudaStream_t& stream = 0);
-
-    void upscaleDepth(Mat& depthImage, int targetWidth, int targetHeight, int size);
-
-    void setInput(Mat& image);
 
     void postprocess(std::vector<Detection>& bboxes);
 
@@ -66,7 +52,7 @@ private:
 
     vector<Dims> mInputDims;            //!< The dimensions of the input to the network.
     vector<Dims> mOutputDims;           //!< The dimensions of the output to the network.
-    vector<void*> mGpuBuffers;          //!< The vector of device buffers needed for engine execution
+    vector<float*> mGpuBuffers;          //!< The vector of device buffers needed for engine execution
     vector<float*> mCpuBuffers;
     vector<size_t> mBufferBindingBytes;
     vector<size_t> mBufferBindingSizes;

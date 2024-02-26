@@ -2,6 +2,7 @@
 #include "logging.h"
 #include "cuda_utils.h"
 #include "macros.h"
+#include "preprocess.h"
 
 #include <fstream>
 #include <iostream>
@@ -107,6 +108,7 @@ Yolov9::~Yolov9()
         delete[] mCpuBuffers[i];
 
     // Destroy the engine
+    cuda_preprocess_destroy();
     delete mContext;
     delete mEngine;
     delete mRuntime;
@@ -163,6 +165,8 @@ void Yolov9::initialize()
 
     CUDA_CHECK(cudaStreamCreate(&mCudaStream));
         
+    cuda_preprocess_init(mParams.kMaxInputImageSize);
+
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> dis(100, 255);
@@ -174,14 +178,10 @@ void Yolov9::initialize()
             dis(gen));
         colors.push_back(color);
     }
-
 }
 
 //!
-//! \brief Runs the TensorRT inference engine for this sample
-//!
-//! \details This function is the main execution function of the sample. It allocates the buffer,
-//!          sets inputs and executes the engine.
+//! \brief Runs the TensorRT inference engine for YOLOv9
 //!
 void Yolov9::predict(Mat& inputImage, std::vector<Detection> &bboxes)
 {
@@ -189,21 +189,18 @@ void Yolov9::predict(Mat& inputImage, std::vector<Detection> &bboxes)
     const int W = mInputDims[0].d[3];
 
     // Preprocessing
-    auto resizedImage = resizeImage(inputImage, W, H);
-    setInput(resizedImage);
-
-    // Memcpy from host input buffers to device input buffers
-    copyInputToDeviceAsync(mCudaStream);
+    cuda_preprocess(inputImage.ptr(), inputImage.cols, inputImage.rows, mGpuBuffers[0], W, H, mCudaStream);
+    CUDA_CHECK(cudaStreamSynchronize(mCudaStream));
 
     // Perform inference
-    if (!mContext->executeV2(mGpuBuffers.data()))
+    if (!mContext->executeV2((void**)mGpuBuffers.data()))
     {
         cout << "inference error!" << endl;
         return;
     }
 
     // Memcpy from device output buffers to host output buffers
-    copyOutputToHostAsync(mCudaStream);
+    CUDA_CHECK(cudaMemcpyAsync(mCpuBuffers[1], mGpuBuffers[1], mBufferBindingBytes[1], cudaMemcpyDeviceToHost, mCudaStream));
 
     postprocess(bboxes);
 }
@@ -254,11 +251,12 @@ void Yolov9::postprocess(std::vector<Detection>& output)
     }
 }
 
-
 void Yolov9::draw_bboxes(cv::Mat& frame, const std::vector<Detection>& output)
 {
-    float r_w = mInputDims[0].d[3] / (frame.cols * 1.0f);
-    float r_h = mInputDims[0].d[2] / (frame.rows * 1.0f);
+    const int H = mInputDims[0].d[2];
+    const int W = mInputDims[0].d[3];
+    const float r_h = H / (float)frame.rows;
+    const float r_w = W / (float)frame.cols;
 
     for (int i = 0; i < output.size(); i++)
     {
@@ -270,13 +268,13 @@ void Yolov9::draw_bboxes(cv::Mat& frame, const std::vector<Detection>& output)
         if (r_h > r_w) 
         {
             box.x = box.x / r_w;
-            box.y = box.y / r_w;
+            box.y = (box.y - (H - r_w * frame.rows) / 2) / r_w;
             box.width = box.width / r_w;
             box.height = box.height / r_w;
         }
         else 
         {
-            box.x = box.x / r_h;
+            box.x = (box.x - (W - r_h * frame.cols) / 2) / r_h;
             box.y = box.y / r_h;
             box.width = box.width / r_h;
             box.height = box.height / r_h;
@@ -301,70 +299,6 @@ void Yolov9::draw_bboxes(cv::Mat& frame, const std::vector<Detection>& output)
     }
 }
 
-//!
-//! \brief Copy the contents of input host buffers to input device buffers asynchronously.
-//!
-void Yolov9::copyInputToDeviceAsync(const cudaStream_t& stream)
-{
-    memcpyBuffers(true, false, true, stream);
-}
-
-//!
-//! \brief Copy the contents of output device buffers to output host buffers asynchronously.
-//!
-void Yolov9::copyOutputToHostAsync(const cudaStream_t& stream)
-{
-    memcpyBuffers(false, true, true, stream);
-}
-
-void Yolov9::memcpyBuffers(const bool copyInput, const bool deviceToHost, const bool async, const cudaStream_t& stream)
-{
-    for (int i = 0; i < mEngine->getNbBindings(); i++)
-    {
-        void* dstPtr = deviceToHost ? mCpuBuffers[i] : mGpuBuffers[i];
-        const void* srcPtr = deviceToHost ? mGpuBuffers[i] : mCpuBuffers[i];
-        const size_t byteSize = mBufferBindingBytes[i];
-        const cudaMemcpyKind memcpyType = deviceToHost ? cudaMemcpyDeviceToHost : cudaMemcpyHostToDevice;
-
-        if ((copyInput && mEngine->bindingIsInput(i)) || (!copyInput && !mEngine->bindingIsInput(i)))
-        {
-            if (async)
-            {
-                CUDA_CHECK(cudaMemcpyAsync(dstPtr, srcPtr, byteSize, memcpyType, stream));
-            }
-            else
-            {
-                CUDA_CHECK(cudaMemcpy(dstPtr, srcPtr, byteSize, memcpyType));
-            }
-        }
-    }
-}
-
-
-Mat Yolov9::resizeImage(Mat& img, int inputWidth, int inputHeight)
-{
-    int w, h;
-    float aspectRatio = (float)img.cols / (float)img.rows;
-
-    if (aspectRatio >= 1)
-    {
-        w = inputWidth;
-        h = int(inputHeight / aspectRatio);
-    }
-    else
-    {
-        w = int(inputWidth * aspectRatio);
-        h = inputHeight;
-    }
-
-    Mat re(h, w, CV_8UC3);
-    cv::resize(img, re, re.size(), 0, 0, INTER_LINEAR);
-    Mat out(inputHeight, inputWidth, CV_8UC3, 0.0);
-    re.copyTo(out(Rect(0, 0, re.cols, re.rows)));
-
-    return out;
-}
-
 size_t Yolov9::getSizeByDim(const Dims& dims)
 {
     size_t size = 1;
@@ -375,24 +309,4 @@ size_t Yolov9::getSizeByDim(const Dims& dims)
     }
 
     return size;
-}
-
-void Yolov9::setInput(Mat& inputImage)
-{
-    const int inputH = mInputDims[0].d[2];
-    const int inputW = mInputDims[0].d[3];
-
-    int i = 0;
-    for (int row = 0; row < inputImage.rows; ++row)
-    {
-        uchar* uc_pixel = inputImage.data + row * inputImage.step;
-        for (int col = 0; col < inputImage.cols; ++col)
-        {
-            mCpuBuffers[0][i] = (float)uc_pixel[2] / 255.0f;
-            mCpuBuffers[0][i + inputImage.rows * inputImage.cols] = (float)uc_pixel[1] / 255.0f;
-            mCpuBuffers[0][i + 2 * inputImage.rows * inputImage.cols] = (float)uc_pixel[0] / 255.0f;
-            uc_pixel += 3;
-            ++i;
-        }
-    }
 }
