@@ -9,12 +9,12 @@
 ``` shell
 python export.py --weights yolov9-c.pt --include onnx
 ```
-4. Build a TensorRT engine: 
+3. Build a TensorRT engine: 
 
 ``` shell
 trtexec.exe --onnx=yolov9-c.onnx --explicitBatch --saveEngine=yolov9-c.engine --fp16
 ```
-5. Set `opencv` and `tensorrt` installation paths in CMakeLists.txt:
+4. Set `opencv` and `tensorrt` installation paths in CMakeLists.txt:
 
 ```
 # Find and include OpenCV
@@ -26,7 +26,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 set(TENSORRT_DIR "your path to TensorRT")
 ```
 
-6. Build:
+5. Build:
    
 ``` shell
 mkdir build
