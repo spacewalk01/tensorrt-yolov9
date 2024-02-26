@@ -15,7 +15,7 @@ python export.py --weights yolov9-c.pt --include onnx
 trtexec.exe --onnx=yolov9-c.onnx --explicitBatch --saveEngine=yolov9-c.engine --fp16
 ```
 4. Install Eigen referring to [this guide](https://rubengerritsen.nl/docs/02_cmake/01_windows/)
-5. Set `opencv` and `tensorrt` installation paths in CMakeLists.txt:
+5. Set `opencv` and `tensorrt` installation paths in [CMakeLists.txt](https://github.com/spacewalk01/tensorrt-yolov9/blob/main/CMakeLists.txt):
 
 ```
 # Find and include OpenCV
