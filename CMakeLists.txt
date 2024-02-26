@@ -30,12 +30,12 @@ set(HEADERS
 )
 
 # Find and include OpenCV
-set(OpenCV_DIR "D:\\Utils\\opencv\\opencv49_cpu\\build")
+set(OpenCV_DIR "your path to OpenCV")
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 # Set TensorRT path if not set in environment variables
-set(TENSORRT_DIR "D:\\Utils\\TensorRT-8.6.0.12")
+set(TENSORRT_DIR "your path to TensorRT")
 
 # Include TensorRT
 include_directories(${TENSORRT_DIR}/include)
