@@ -22,8 +22,6 @@ yolov9-tensorrt.exe yolov9-c.engine test.mp4 # the video path
 
 We refer to our [docs/INSTALL.md](https://github.com/spacewalk01/tensorrt-yolov9/blob/main/docs/INSTALL.md) for detailed installation instructions.
 
-If you find it interesting, then also take a look at [Yolov9-Bytetrack](https://github.com/spacewalk01/yolov9-bytetrack-tensorrt).
-
 ## 🖥️ Requirement
    - TensorRT
    - CUDA, CudaNN
@@ -35,4 +33,6 @@ This project is based on the following awesome projects:
 - [Yolov9](https://github.com/WongKinYiu/yolov9) - YOLOv9: Learning What You Want to Learn Using Programmable Gradient Information.
 - [TensorRT](https://github.com/NVIDIA/TensorRT/tree/release/8.6/samples) - TensorRT samples and api documentation.
 - [TensorRTx](https://github.com/wang-xinyu/tensorrtx) - Implementation of popular deep learning networks with TensorRT network definition API.
+
+If you find it interesting, then also take a look at [Yolov9-Bytetrack](https://github.com/spacewalk01/yolov9-bytetrack-tensorrt).
 
