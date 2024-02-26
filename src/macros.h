@@ -24,28 +24,4 @@
 #define TRT_CONST_ENQUEUE
 #endif
 
-std::string changeFileExtension(const std::string& fileName) {
-    // Find the position of the last '.' in the file name
-    size_t dotPosition = fileName.find_last_of('.');
-
-    // Check if a dot was found
-    if (dotPosition != std::string::npos) {
-        // Create the new file name with .engine extension
-        return fileName.substr(0, dotPosition) + ".engine";
-    }
-    else {
-        // Return the original file name if there is no dot
-        std::cerr << "Error: Invalid file name format." << std::endl;
-        return fileName;
-    }
-}
-
-std::string getFileExtension(const std::string& filePath) {
-    size_t dotPos = filePath.find_last_of(".");
-    if (dotPos != std::string::npos) {
-        return filePath.substr(dotPos + 1);
-    }
-    return ""; // No extension found
-}
-
 #endif  // __MACROS_H
