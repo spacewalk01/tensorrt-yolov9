@@ -282,11 +282,6 @@ void Yolov9::draw_bboxes(cv::Mat& frame, const std::vector<Detection>& output)
 
         float xmax = box.x + box.width;
         float ymax = box.y + box.height;
-
-        // detection box
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<int> dis(100, 255);
         
         cv::rectangle(frame, cv::Point(box.x, box.y), cv::Point(xmax, ymax), colors[classId], 3);
 
