@@ -3,7 +3,8 @@
 1. Setup [yolov9](https://github.com/WongKinYiu/yolov9) and download [yolov9-c.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c.pt) model.
 3. Convert the model to onnx format:
 
-- First, modify `utils/general.py` in yolov9 repo by following this [guide](https://github.com/WongKinYiu/yolov9/pull/20).
+- Copy `general.y` in this repo to `utils/general.py` in yolov9 installation folder
+- Then `export.py` in this repo to yolov9 installation folder
 - Export the model
 ``` shell
 python export.py --weights yolov9-c.pt --include onnx
