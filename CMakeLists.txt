@@ -10,25 +10,27 @@ add_definitions(-DAPI_EXPORTS)
 # Include CUDA directories
 include_directories(${CUDA_INCLUDE_DIRS})
 
+include_directories("./src/")
+
 # Add source files
 set(SOURCES
     main.cpp
-    yolov9.cpp
+    src/yolov9.cpp
 )
 
+include_directories(src/)
+
 # Add CUDA source files
-set(CUDA_SOURCES preprocess.cu)
+set(CUDA_SOURCES src/preprocess.cu)
 
 # Add headers
 set(HEADERS
-    yolov9.h
-    macros.h
-    logging.h
-    cuda_utils.h
-    preprocess.h
+    src/yolov9.h
+    src/macros.h
+    src/logging.h
+    src/cuda_utils.h
+    src/preprocess.h
 )
-
-
 
 # Find and include OpenCV
 set(OpenCV_DIR "D:\\Utils\\opencv\\opencv49_cpu\\build")
