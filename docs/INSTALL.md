@@ -1,7 +1,7 @@
 ## Installation
 
 1. Setup [yolov9](https://github.com/WongKinYiu/yolov9) and download [yolov9-c.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c.pt) model.
-3. Convert the model to onnx format:
+2. Convert the model to onnx format:
 
 - Copy `general.y` in this repo to `utils/general.py` in yolov9 installation folder
 - Copy `export.py` in this repo to yolov9 installation folder
@@ -14,7 +14,8 @@ python export.py --weights yolov9-c.pt --include onnx
 ``` shell
 trtexec.exe --onnx=yolov9-c.onnx --explicitBatch --saveEngine=yolov9-c.engine --fp16
 ```
-4. Set `opencv` and `tensorrt` installation paths in CMakeLists.txt:
+4. Install Eigen referring to [this guide](https://rubengerritsen.nl/docs/02_cmake/01_windows/)
+5. Set `opencv` and `tensorrt` installation paths in CMakeLists.txt:
 
 ```
 # Find and include OpenCV
