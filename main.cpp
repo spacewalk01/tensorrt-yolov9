@@ -52,7 +52,7 @@ int main(int argc, char** argv)
         {
             imagePathList.push_back(path);
         }
-        else if (suffix == "mp4" || suffix == "avi" || suffix == "m4v" || suffix == "mpeg" || suffix == "mov" || suffix == "mkv")
+        else if (suffix == "mp4" || suffix == "avi" || suffix == "m4v" || suffix == "mpeg" || suffix == "mov" || suffix == "mkv" || suffix == "webm")
         {
             isVideo = true;
         }
