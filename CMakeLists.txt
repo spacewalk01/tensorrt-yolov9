@@ -9,16 +9,13 @@ add_definitions(-DAPI_EXPORTS)
 
 # Include CUDA directories
 include_directories(${CUDA_INCLUDE_DIRS})
-
-include_directories("./src/")
+include_directories(src/)
 
 # Add source files
 set(SOURCES
     main.cpp
     src/yolov9.cpp
 )
-
-include_directories(src/)
 
 # Add CUDA source files
 set(CUDA_SOURCES src/preprocess.cu)
