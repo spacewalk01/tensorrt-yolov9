@@ -210,8 +210,9 @@ void Yolov9::postprocess(std::vector<Detection>& output)
     std::vector<cv::Rect> boxes;
     vector<int> class_ids;
     vector<float> confidences;
-    int out_rows = 84;
-    int out_cols = 8400;
+    int out_rows = mOutputDims[0].d[1];
+    int out_cols = mOutputDims[0].d[2];
+
     const cv::Mat det_output(out_rows, out_cols, CV_32F, (float*)mCpuBuffers[1]);
 
     for (int i = 0; i < det_output.cols; ++i) {
