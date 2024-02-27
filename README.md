@@ -25,6 +25,8 @@ We refer to our [docs/INSTALL.md](https://github.com/spacewalk01/tensorrt-yolov9
 ## 🖥️ Requirement
    - TensorRT
    - CUDA, CudaNN
+   - C++ compiler with C++17 or higher support
+   - CMake 3.14 or higher
    - OpenCV
      
 ## 👏 Acknowledgement
