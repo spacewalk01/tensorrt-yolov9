@@ -3,16 +3,15 @@
 1. Setup [yolov9](https://github.com/WongKinYiu/yolov9) and download [yolov9-c.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c.pt) model.
 2. Convert the model to onnx format:
 
-- Copy `general.y` in this repo to `utils/general.py` in yolov9 installation folder
-- Copy `export.py` in this repo to yolov9 installation folder
+- Run `reparameterization.py` after setting model paths. (Todo: use arguments)
 - Then export the model
 ``` shell
-python export.py --weights yolov9-c.pt --include onnx
+python export.py --weights yolov9-c-converted.pt --include onnx
 ```
 3. Build a TensorRT engine: 
 
 ``` shell
-trtexec.exe --onnx=yolov9-c.onnx --explicitBatch --saveEngine=yolov9-c.engine --fp16
+trtexec.exe --onnx=yolov9-c-converted.onnx --explicitBatch --saveEngine=yolov9-c.engine --fp16
 ```
 4. Set `opencv` and `tensorrt` installation paths in [CMakeLists.txt](https://github.com/spacewalk01/tensorrt-yolov9/blob/main/CMakeLists.txt):
 
