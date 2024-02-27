@@ -3,8 +3,8 @@
 
  This repo hosts a C++ implementation of the [YOLOv9](https://github.com/WongKinYiu/yolov9) state of the art object detection model, leveraging the TensorRT API for efficient real-time inference.
 <p align="center" margin: 0 auto;>
-  <img src="assets/traffic.gif" width="320px" />
-  <img src="assets/parkinglot.gif" width="320px" /> 
+  <img src="assets/traffic.gif" width="340px" />
+  <img src="assets/parkinglot.gif" width="340px" /> 
 </p>
 
 ## 🚀 Usage
