@@ -3,7 +3,7 @@
 1. Clone YOLOv9 repo and install requirements:
 
 ``` shell
-git clone https://github.com/WongKinYiu/yolov9  # clone
+git clone https://github.com/WongKinYiu/yolov9
 cd yolov9
 pip install -r requirements.txt  
 ```
