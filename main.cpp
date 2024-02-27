@@ -7,14 +7,10 @@
 
 #include <iostream>
 #include <string>
-#include <tuple>
-#include <NvInfer.h>
-#include <opencv2/opencv.hpp>
 #include "yolov9.h"
 
-using namespace std;
 
-bool IsPathExist(const std::string& path) {
+bool IsPathExist(const string& path) {
 #ifdef _WIN32
     DWORD fileAttributes = GetFileAttributesA(path.c_str());
     return (fileAttributes != INVALID_FILE_ATTRIBUTES);
@@ -22,7 +18,7 @@ bool IsPathExist(const std::string& path) {
     return (access(path.c_str(), F_OK) == 0);
 #endif
 }
-bool IsFile(const std::string& path) {
+bool IsFile(const string& path) {
     if (!IsPathExist(path)) {
         printf("%s:%d %s not exist\n", __FILE__, __LINE__, path.c_str());
         return false;
@@ -39,15 +35,15 @@ bool IsFile(const std::string& path) {
 
 int main(int argc, char** argv)
 {
-    const std::string engine_file_path{ argv[1] };
-    const std::string path{ argv[2] };
-    std::vector<std::string> imagePathList;
+    const string engine_file_path{ argv[1] };
+    const string path{ argv[2] };
+    vector<string> imagePathList;
     bool                     isVideo{ false };
     assert(argc == 3);
 
     if (IsFile(path)) 
     {
-        std::string suffix = path.substr(path.find_last_of('.') + 1);
+        string suffix = path.substr(path.find_last_of('.') + 1);
         if (suffix == "jpg" || suffix == "jpeg" || suffix == "png")
         {
             imagePathList.push_back(path);
@@ -58,53 +54,53 @@ int main(int argc, char** argv)
         }
         else {
             printf("suffix %s is wrong !!!\n", suffix.c_str());
-            std::abort();
+            abort();
         }
     }
     else if (IsPathExist(path))
     {
-        cv::glob(path + "/*.jpg", imagePathList);
+        glob(path + "/*.jpg", imagePathList);
     }
 
     // Assume it's a folder, add logic to handle folders
     // init model
-    Yolov9 yolomodel(engine_file_path);
+    Yolov9 model(engine_file_path);
 
     if (isVideo) {
         //path to video
         string VideoPath = path;
         // open cap
-        cv::VideoCapture cap(VideoPath);
+        VideoCapture cap(VideoPath);
 
-        int width = cap.get(cv::CAP_PROP_FRAME_WIDTH);
-        int height = cap.get(cv::CAP_PROP_FRAME_HEIGHT);
+        int width = cap.get(CAP_PROP_FRAME_WIDTH);
+        int height = cap.get(CAP_PROP_FRAME_HEIGHT);
 
         // Create a VideoWriter object to save the processed video
-        cv::VideoWriter output_video("output_video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30, cv::Size(width, height));
+        VideoWriter output_video("output_video.avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), 30, Size(width, height));
         while (1)
         {
-            cv::Mat frame;
+            Mat frame;
             cap >> frame;
 
             if (frame.empty()) break;
 
-            auto start = std::chrono::system_clock::now();
+            auto start = chrono::system_clock::now();
             
-            std::vector<Detection> bboxes;
-            yolomodel.predict(frame, bboxes);
+            vector<Detection> bboxes;
+            model.predict(frame, bboxes);
 
             auto end = chrono::system_clock::now();
             cout << "Time of per frame: " << chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms" << endl;
 
-            yolomodel.draw(frame, bboxes);
+            model.draw(frame, bboxes);
 
             imshow("prediction", frame);
             output_video.write(frame);
-            cv::waitKey(1);
+            waitKey(1);
         }
 
         // Release resources
-        cv::destroyAllWindows();
+        destroyAllWindows();
         cap.release();
         output_video.release();
     }
@@ -114,7 +110,7 @@ int main(int argc, char** argv)
         for (const auto& imagePath : imagePathList)
         {
             // open image
-            cv::Mat frame = cv::imread(imagePath);
+            Mat frame = imread(imagePath);
             if (frame.empty())
             {
                 cerr << "Error reading image: " << imagePath << endl;
@@ -123,24 +119,25 @@ int main(int argc, char** argv)
 
             auto start = chrono::system_clock::now();
 
-            std::vector<Detection> bboxes;
-            yolomodel.predict(frame, bboxes);
-            yolomodel.draw(frame, bboxes);
+            vector<Detection> bboxes;
+            model.predict(frame, bboxes);
+            model.draw(frame, bboxes);
 
             auto end = chrono::system_clock::now();
             cout << "Time of per frame: " << chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms" << endl;
             
-            std::istringstream iss(imagePath);
-            std::string token;
-            while (std::getline(iss, token, '/'))
+            istringstream iss(imagePath);
+            string token;
+            while (getline(iss, token, '/'))
             {
             }
-            cv::imwrite(imageFolderPath_out + token, frame);
-            std::cout << imageFolderPath_out + token << std::endl;
+            imwrite(imageFolderPath_out + token, frame);
+            cout << imageFolderPath_out + token << endl;
 
             imshow("prediction", frame);
-            cv::waitKey(0);
+            waitKey(0);
         }
     }
+    
     return 0;
 }
