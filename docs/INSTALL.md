@@ -14,21 +14,21 @@ pip install -r requirements.txt
 - Put `reparameterize.py` file to YOLOv9 installation folder and perform re-parameterization:
   
 ``` shell
-python reparameterize.py yolov9-c.pt yolov9-c-param.pt
+python reparameterize.py yolov9-c.pt yolov9-c-converted.pt
 ```
 
 - Or you can skip re-parameterization and downloaded re-parameterized models [yolov9-c-converted.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c-converted.pt) and [yolov9-e-converted.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-e-converted.pt).
   
-- Export the model:
+- Then export the model:
   
 ``` shell
-python export.py --weights yolov9-c-param.pt --include onnx
+python export.py --weights yolov9-c-converted.pt --include onnx
 ```
 
 4. Build a TensorRT engine: 
 
 ``` shell
-trtexec.exe --onnx=yolov9-c-param.onnx --explicitBatch --saveEngine=yolov9-c.engine --fp16
+trtexec.exe --onnx=yolov9-c-converted.onnx --explicitBatch --saveEngine=yolov9-c.engine --fp16
 ```
  
  Note that here `--fp16` is an optional argument for performing inference using fp16 precision.
