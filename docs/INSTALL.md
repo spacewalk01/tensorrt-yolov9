@@ -1,19 +1,27 @@
 ## Installation
 
-1. Clone and setup [yolov9](https://github.com/WongKinYiu/yolov9) and then download [yolov9-c.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c.pt) model.
-2. Convert the model to onnx format:
+1. Clone and setup [yolov9](https://github.com/WongKinYiu/yolov9)
+2. Download [yolov9-c.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c.pt) model.
+3. Convert the model to onnx format:
 
-- Run `reparameterization.py` after setting model paths. (Todo: use arguments)
-- Then export the model
+- Perform re-parameterization:
+  
 ``` shell
-python export.py --weights yolov9-c-converted.pt --include onnx
+python reparameterize.py yolov9-c.pt yolov9-c-param.pt
 ```
-3. Build a TensorRT engine: 
+
+- Export the model:
+  
+``` shell
+python export.py --weights yolov9-c-param.pt --include onnx
+```
+
+4. Build a TensorRT engine: 
 
 ``` shell
-trtexec.exe --onnx=yolov9-c-converted.onnx --explicitBatch --saveEngine=yolov9-c.engine --fp16
+trtexec.exe --onnx=yolov9-c-param.onnx --explicitBatch --saveEngine=yolov9-c.engine --fp16
 ```
-4. Set `opencv` and `tensorrt` installation paths in [CMakeLists.txt](https://github.com/spacewalk01/tensorrt-yolov9/blob/main/CMakeLists.txt):
+5. Set `opencv` and `tensorrt` installation paths in [CMakeLists.txt](https://github.com/spacewalk01/tensorrt-yolov9/blob/main/CMakeLists.txt):
 
 ```
 # Find and include OpenCV
@@ -25,7 +33,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 set(TENSORRT_DIR "your path to TensorRT")
 ```
 
-5. Build:
+6. Build the project:
    
 ``` shell
 mkdir build
