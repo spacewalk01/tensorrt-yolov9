@@ -33,7 +33,7 @@ trtexec.exe --onnx=yolov9-c-converted.onnx --explicitBatch --saveEngine=yolov9-c
   
     <details>    
     <summary>Note</summary>    
-    `--fp16` is an optional argument for performing inference using fp16 precision.    
+    --fp16 is an optional argument for performing inference using fp16 precision.    
     </details>
 
 5. Set `opencv` and `tensorrt` installation paths in [CMakeLists.txt](https://github.com/spacewalk01/tensorrt-yolov9/blob/main/CMakeLists.txt):
