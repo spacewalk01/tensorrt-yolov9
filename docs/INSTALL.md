@@ -1,6 +1,6 @@
 ## Installation
 
-1. Clone YOLOv9 repo and install requirements:
+1. Clone YOLOv9 repo and install its requirements:
 
 ``` shell
 git clone https://github.com/WongKinYiu/yolov9
@@ -17,7 +17,7 @@ pip install -r requirements.txt
 python reparameterize.py yolov9-c.pt yolov9-c-converted.pt
 ```
 
-- Or you can skip re-parameterization and downloaded re-parameterized models [yolov9-c-converted.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c-converted.pt) and [yolov9-e-converted.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-e-converted.pt).
+- Or you can skip re-parameterization and downloaded the re-parameterized models [yolov9-c-converted.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c-converted.pt) and [yolov9-e-converted.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-e-converted.pt).
   
 - Then export the model:
   
