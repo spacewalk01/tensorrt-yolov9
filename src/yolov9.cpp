@@ -252,7 +252,7 @@ void Yolov9::postprocess(std::vector<Detection>& output)
     }
 }
 
-void Yolov9::draw_bboxes(cv::Mat& frame, const std::vector<Detection>& output)
+void Yolov9::draw(cv::Mat& frame, const std::vector<Detection>& output)
 {
     const int H = mInputDims[0].d[2];
     const int W = mInputDims[0].d[3];
