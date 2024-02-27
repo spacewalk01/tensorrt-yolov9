@@ -91,50 +91,46 @@ const vector<string> coconame = { "person",
         "hair drier",
         "toothbrush" };
 
-Yolov9::Yolov9(string enginePath)
+Yolov9::Yolov9(string engine_path)
 {
-    std::ifstream file(enginePath, std::ios::binary);
-    if (!file.good()) {
-        std::cerr << "read " << enginePath << " error!" << std::endl;
-    }
-    size_t size = 0;
-    file.seekg(0, file.end);
-    size = file.tellg();
-    file.seekg(0, file.beg);
-    char* serialized_engine = new char[size];
+    // Read the engine file
+    ifstream engineStream(engine_path, ios::binary);
+    engineStream.seekg(0, ios::end);
+    const size_t modelSize = engineStream.tellg();
+    engineStream.seekg(0, ios::beg);
+    unique_ptr<char[]> engineData(new char[modelSize]);
+    engineStream.read(engineData.get(), modelSize);
+    engineStream.close();
 
-    file.read(serialized_engine, size);
-    file.close();
-
+    // Deserialize the tensorrt engine
     runtime = createInferRuntime(gLogger);
-
-    engine = runtime->deserializeCudaEngine(serializedEngine, size);
-
+    engine = runtime->deserializeCudaEngine(engineData.get(), modelSize);
     context = engine->createExecutionContext();
 
-    delete[] serialized_engine;
-
+    // Get input and output sizes of the model
     model_input_h = engine->getBindingDimensions(0).d[2];
     model_input_w = engine->getBindingDimensions(0).d[3];
-    num_ouput_boxes = engine->getBindingDimensions(1).d[2];
-    ouput_size = engine->getBindingDimensions(1).d[1];
+    detection_attribute_size = engine->getBindingDimensions(1).d[1];
+    num_detections = engine->getBindingDimensions(1).d[2];
+    num_classes = detection_attribute_size - 4;
 
-    cpu_buffer = new float[ouput_size * num_output_boxes];
-    cudaMalloc(&mGpuBuffers[i], 3 * model_input_w * model_input_h * sizeof(float));
+    // Initialize input buffers
+    cpu_output_buffer = new float[detection_attribute_size * num_detections];
+    CUDA_CHECK(cudaMalloc(&gpu_buffers[0], 3 * model_input_w * model_input_h * sizeof(float)));
+    // Initialize output buffer
+    CUDA_CHECK(cudaMalloc(&gpu_buffers[1], detection_attribute_size * num_detections * sizeof(float)));
 
-    CUDA_CHECK(cudaStreamCreate(&cuda_stream));
-        
     cuda_preprocess_init(MAX_IMAGE_SIZE);
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> dis(100, 255);
+    CUDA_CHECK(cudaStreamCreate(&cuda_stream));
 
+    // Create random colors
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<int> dis(100, 255);
     for (int i = 0; i < coconame.size(); i++)
     {
-        cv::Scalar color = cv::Scalar(dis(gen),
-            dis(gen),
-            dis(gen));
+        Scalar color = Scalar(dis(gen), dis(gen), dis(gen));
         colors.push_back(color);
     }
 }
@@ -143,10 +139,9 @@ Yolov9::~Yolov9()
 {
     // Release stream and buffers
     cudaStreamDestroy(cuda_stream);
-    for (int i = 0; i < gpu_buffers.size(); i++)
+    for (int i = 0; i < 2; i++)
         CUDA_CHECK(cudaFree(gpu_buffers[i]));
-    for (int i = 0; i < cpu_buffers.size(); i++)
-        delete[] cpu_buffers[i];
+    delete[] cpu_buffer;
 
     // Destroy the engine
     cuda_preprocess_destroy();
@@ -158,50 +153,42 @@ Yolov9::~Yolov9()
 //!
 //! \brief Runs the TensorRT inference engine for YOLOv9
 //!
-void Yolov9::predict(Mat& inputImage, std::vector<Detection> &bboxes)
+void Yolov9::predict(Mat& image, vector<Detection> &output)
 {
-    const int H = mInputDims[0].d[2];
-    const int W = mInputDims[0].d[3];
-
-    // Preprocessing
-    cuda_preprocess(inputImage.ptr(), inputImage.cols, inputImage.rows, mGpuBuffers[0], W, H, mCudaStream);
-    CUDA_CHECK(cudaStreamSynchronize(mCudaStream));
+    // Preprocessing data on gpu
+    cuda_preprocess(image.ptr(), image.cols, image.rows, gpu_buffers[0], model_input_w, model_input_h, cuda_stream);
 
     // Perform inference
-    if (!mContext->executeV2((void**)mGpuBuffers.data()))
-    {
-        cout << "inference error!" << endl;
-        return;
-    }
+    context->enqueueV2(gpu_buffers, cuda_stream, nullptr);
+    CUDA_CHECK(cudaStreamSynchronize(cuda_stream));
 
-    // Memcpy from device output buffers to host output buffers
-    CUDA_CHECK(cudaMemcpyAsync(mCpuBuffers[1], mGpuBuffers[1], mBufferBindingBytes[1], cudaMemcpyDeviceToHost, mCudaStream));
+    // Memcpy from device output buffer to host output buffer
+    CUDA_CHECK(cudaMemcpyAsync(cpu_output_buffer, gpu_buffers[1], num_detections * detection_attribute_size * sizeof(float), cudaMemcpyDeviceToHost, cuda_stream));
 
-    postprocess(bboxes);
+    // Perform postprocessing
+    postprocess(output);
 }
 
-void Yolov9::postprocess(std::vector<Detection>& output)
+void Yolov9::postprocess(vector<Detection>& output)
 {
-    std::vector<cv::Rect> boxes;
+    vector<Rect> boxes;
     vector<int> class_ids;
     vector<float> confidences;
-    int out_rows = mOutputDims[0].d[1];
-    int out_cols = mOutputDims[0].d[2];
 
-    const cv::Mat det_output(out_rows, out_cols, CV_32F, (float*)mCpuBuffers[1]);
+    const Mat det_output(detection_attribute_size, num_detections, CV_32F, cpu_output_buffer);
 
     for (int i = 0; i < det_output.cols; ++i) {
-        const cv::Mat classes_scores = det_output.col(i).rowRange(4, 84);
-        cv::Point class_id_point;
+        const Mat classes_scores = det_output.col(i).rowRange(4, 4 + num_classes);
+        Point class_id_point;
         double score;
-        cv::minMaxLoc(classes_scores, nullptr, &score, nullptr, &class_id_point);
+        minMaxLoc(classes_scores, nullptr, &score, nullptr, &class_id_point);
 
-        if (score > mParams.confThreshold) {
+        if (score > conf_threshold) {
             const float cx = det_output.at<float>(0, i);
             const float cy = det_output.at<float>(1, i);
             const float ow = det_output.at<float>(2, i);
             const float oh = det_output.at<float>(3, i);
-            cv::Rect box;
+            Rect box;
             box.x = static_cast<int>((cx - 0.5 * ow));
             box.y = static_cast<int>((cy - 0.5 * oh));
             box.width = static_cast<int>(ow);
@@ -213,8 +200,8 @@ void Yolov9::postprocess(std::vector<Detection>& output)
         }
     }
 
-    std::vector<int> nms_result;
-    cv::dnn::NMSBoxes(boxes, confidences, mParams.confThreshold, mParams.nmsThreshold, nms_result);
+    vector<int> nms_result;
+    dnn::NMSBoxes(boxes, confidences, conf_threshold, nms_threshold, nms_result);
 
     for (int i = 0; i < nms_result.size(); i++)
     {
@@ -227,57 +214,40 @@ void Yolov9::postprocess(std::vector<Detection>& output)
     }
 }
 
-void Yolov9::draw(cv::Mat& frame, const std::vector<Detection>& output)
+void Yolov9::draw(Mat& image, const vector<Detection>& output)
 {
-    const int H = mInputDims[0].d[2];
-    const int W = mInputDims[0].d[3];
-    const float r_h = H / (float)frame.rows;
-    const float r_w = W / (float)frame.cols;
+    const float ratio_h = model_input_h / (float)image.rows;
+    const float ratio_w = model_input_w / (float)image.cols;
 
     for (int i = 0; i < output.size(); i++)
     {
         auto detection = output[i];
         auto box = detection.box;
-        auto classId = detection.class_id;
-        auto confidence = detection.confidence;
+        auto class_id = detection.class_id;
+        auto conf = detection.conf;
 
-        if (r_h > r_w) 
+        if (ratio_h > ratio_w) 
         {
-            box.x = box.x / r_w;
-            box.y = (box.y - (H - r_w * frame.rows) / 2) / r_w;
-            box.width = box.width / r_w;
-            box.height = box.height / r_w;
+            box.x = box.x / ratio_w;
+            box.y = (box.y - (model_input_h - ratio_w * image.rows) / 2) / ratio_w;
+            box.width = box.width / ratio_w;
+            box.height = box.height / ratio_w;
         }
         else 
         {
-            box.x = (box.x - (W - r_h * frame.cols) / 2) / r_h;
-            box.y = box.y / r_h;
-            box.width = box.width / r_h;
-            box.height = box.height / r_h;
+            box.x = (box.x - (model_input_w - ratio_h * image.cols) / 2) / ratio_h;
+            box.y = box.y / ratio_h;
+            box.width = box.width / ratio_h;
+            box.height = box.height / ratio_h;
         }
-
-        float xmax = box.x + box.width;
-        float ymax = box.y + box.height;
         
-        cv::rectangle(frame, cv::Point(box.x, box.y), cv::Point(xmax, ymax), colors[classId], 3);
+        rectangle(image, Point(box.x, box.y), Point(box.x + box.width, box.y + box.height), colors[class_id], 3);
 
         // Detection box text
-        std::string classString = coconame[classId] + ' ' + std::to_string(confidence).substr(0, 4);
-        cv::Size textSize = cv::getTextSize(classString, cv::FONT_HERSHEY_DUPLEX, 1, 2, 0);
-        cv::Rect textBox(box.x, box.y - 40, textSize.width + 10, textSize.height + 20);
-        cv::rectangle(frame, textBox, colors[classId], cv::FILLED);
-        cv::putText(frame, classString, cv::Point(box.x + 5, box.y - 10), cv::FONT_HERSHEY_DUPLEX, 1, cv::Scalar(0, 0, 0), 2, 0);
+        string class_string = coconame[class_id] + ' ' + to_string(conf).substr(0, 4);
+        Size text_size = getTextSize(class_string, FONT_HERSHEY_DUPLEX, 1, 2, 0);
+        Rect text_rect(box.x, box.y - 40, text_size.width + 10, text_size.height + 20);
+        rectangle(image, text_rect, colors[class_id], FILLED);
+        putText(image, class_string, Point(box.x + 5, box.y - 10), FONT_HERSHEY_DUPLEX, 1, Scalar(0, 0, 0), 2, 0);
     }
-}
-
-size_t Yolov9::getSizeByDim(const Dims& dims)
-{
-    size_t size = 1;
-
-    for (size_t i = 0; i < dims.nbDims; ++i)
-    {
-        size *= dims.d[i];
-    }
-
-    return size;
 }
