@@ -20,7 +20,7 @@ yolov9-tensorrt.exe yolov9-c.engine test.mp4 # the video path
 
 ## 🛠️ Setup
 
-We refer to our [docs/INSTALL.md](https://github.com/spacewalk01/tensorrt-yolov9/blob/main/docs/INSTALL.md) for detailed installation instructions.
+Refer to our [docs/INSTALL.md](https://github.com/spacewalk01/tensorrt-yolov9/blob/main/docs/INSTALL.md) for detailed installation instructions.
 
 ## 🖥️ Requirement
    - TensorRT
