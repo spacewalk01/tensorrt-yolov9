@@ -44,8 +44,8 @@ private:
     int num_output_boxes;
     int output_size;
     const int MAX_INPUT_SIZE = 4096 * 4096;
-    float confThreshold = 0.3;
-    float nmsThreshold = 0.4;
+    float conf_threshold = 0.3;
+    float nms_threshold = 0.4;
     
     cudaStream_t cuda_stream;
     IRuntime* runtime;                 //!< The TensorRT runtime used to deserialize the engine
