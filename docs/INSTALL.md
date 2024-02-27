@@ -1,8 +1,15 @@
 ## Installation
 
-1. Clone and setup [yolov9](https://github.com/WongKinYiu/yolov9)
-2. Download [yolov9-c.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c.pt) model.
-3. Convert the model to onnx format:
+1. Clone YOLOv9 repo and install requirements:
+
+``` shell
+git clone https://github.com/WongKinYiu/yolov9  # clone
+cd yolov9
+pip install -r requirements.txt  
+```
+
+3. Download [yolov9-c.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c.pt) model.
+4. Convert the model to onnx format:
 
 - Perform re-parameterization:
   
