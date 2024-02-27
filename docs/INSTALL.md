@@ -1,6 +1,6 @@
 ## Installation
 
-1. Setup [yolov9](https://github.com/WongKinYiu/yolov9) and download [yolov9-c.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c.pt) model.
+1. Clone and setup [yolov9](https://github.com/WongKinYiu/yolov9) and then download [yolov9-c.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c.pt) model.
 2. Convert the model to onnx format:
 
 - Run `reparameterization.py` after setting model paths. (Todo: use arguments)
