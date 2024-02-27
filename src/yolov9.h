@@ -33,7 +33,7 @@ public:
 
     ~Yolov9();
 
-    void draw_bboxes(cv::Mat& testImg, const std::vector<Detection>& bboxes);
+    void draw(cv::Mat& testImg, const std::vector<Detection>& bboxes);
 
 private:
 
