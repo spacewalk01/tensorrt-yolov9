@@ -93,29 +93,6 @@ const vector<string> coconame = { "person",
 
 Yolov9::Yolov9(string enginePath)
 {
-    deserializeEngine(enginePath);
-
-    initialize();
-}
-
-Yolov9::~Yolov9()
-{
-    // Release stream and buffers
-    cudaStreamDestroy(mCudaStream);
-    for (int i = 0; i < mGpuBuffers.size(); i++)
-        CUDA_CHECK(cudaFree(mGpuBuffers[i]));
-    for (int i = 0; i < mCpuBuffers.size(); i++)
-        delete[] mCpuBuffers[i];
-
-    // Destroy the engine
-    cuda_preprocess_destroy();
-    delete mContext;
-    delete mEngine;
-    delete mRuntime;
-}
-
-void Yolov9::deserializeEngine(string enginePath)
-{
     std::ifstream file(enginePath, std::ios::binary);
     if (!file.good()) {
         std::cerr << "read " << enginePath << " error!" << std::endl;
@@ -124,48 +101,27 @@ void Yolov9::deserializeEngine(string enginePath)
     file.seekg(0, file.end);
     size = file.tellg();
     file.seekg(0, file.beg);
-    char* serializedEngine = new char[size];
+    char* serialized_engine = new char[size];
 
-    file.read(serializedEngine, size);
+    file.read(serialized_engine, size);
     file.close();
 
-    mRuntime = createInferRuntime(gLogger);
+    runtime = createInferRuntime(gLogger);
 
-    mEngine = mRuntime->deserializeCudaEngine(serializedEngine, size);
+    engine = runtime->deserializeCudaEngine(serializedEngine, size);
 
-    mContext = mEngine->createExecutionContext();
+    context = engine->createExecutionContext();
 
-    delete[] serializedEngine;
-}
+    delete[] serialized_engine;
 
-void Yolov9::initialize()
-{
-    mGpuBuffers.resize(mEngine->getNbBindings());
-    mCpuBuffers.resize(mEngine->getNbBindings());
-
-    for (size_t i = 0; i < mEngine->getNbBindings(); ++i)
-    {
-        size_t binding_size = getSizeByDim(mEngine->getBindingDimensions(i));
-        mBufferBindingSizes.push_back(binding_size);
-        mBufferBindingBytes.push_back(binding_size * sizeof(float));
-
-        mCpuBuffers[i] = new float[binding_size];
-
-        cudaMalloc(&mGpuBuffers[i], mBufferBindingBytes[i]);
-
-        if (mEngine->bindingIsInput(i))
-        {
-            mInputDims.push_back(mEngine->getBindingDimensions(i));
-        }
-        else
-        {
-            mOutputDims.push_back(mEngine->getBindingDimensions(i));
-        }
-    }
+    
+    
+    mCpuBuffers = new float[binding_size];
+    cudaMalloc(&mGpuBuffers[i], mBufferBindingBytes[i]);
 
     CUDA_CHECK(cudaStreamCreate(&mCudaStream));
         
-    cuda_preprocess_init(mParams.kMaxInputImageSize);
+    cuda_preprocess_init(MAX_IMAGE_SIZE);
 
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -178,6 +134,22 @@ void Yolov9::initialize()
             dis(gen));
         colors.push_back(color);
     }
+}
+
+Yolov9::~Yolov9()
+{
+    // Release stream and buffers
+    cudaStreamDestroy(cuda_stream);
+    for (int i = 0; i < gpu_buffers.size(); i++)
+        CUDA_CHECK(cudaFree(gpu_buffers[i]));
+    for (int i = 0; i < cpu_buffers.size(); i++)
+        delete[] cpu_buffers[i];
+
+    // Destroy the engine
+    cuda_preprocess_destroy();
+    delete context;
+    delete engine;
+    delete runtime;
 }
 
 //!
