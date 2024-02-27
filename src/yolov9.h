@@ -23,9 +23,9 @@ public:
     
     ~Yolov9();
     
-    void predict(Mat& image, std::vector<Detection>& boxes);
+    void predict(Mat& image, vector<Detection>& boxes);
 
-    void draw(Mat& image, const std::vector<Detection>& boxes);
+    void draw(Mat& image, const vector<Detection>& boxes);
 
 private:
 
