@@ -96,7 +96,7 @@ int main(int argc, char** argv)
             auto end = chrono::system_clock::now();
             cout << "Time of per frame: " << chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms" << endl;
 
-            yolomodel.draw_bboxes(frame, bboxes);
+            yolomodel.draw(frame, bboxes);
 
             imshow("prediction", frame);
             output_video.write(frame);
@@ -125,7 +125,7 @@ int main(int argc, char** argv)
 
             std::vector<Detection> bboxes;
             yolomodel.predict(frame, bboxes);
-            yolomodel.draw_bboxes(frame, bboxes);
+            yolomodel.draw(frame, bboxes);
 
             auto end = chrono::system_clock::now();
             cout << "Time of per frame: " << chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms" << endl;
