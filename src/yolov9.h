@@ -9,9 +9,9 @@ using namespace cv;
 
 struct Detection
 {
-    float confidence;
+    float conf;
     int class_id;
-    Rect box;
+    Rect bbox;
 };
 
 class Yolov9
@@ -23,32 +23,33 @@ public:
     
     ~Yolov9();
     
-    void predict(Mat& image, vector<Detection>& boxes);
+    void predict(Mat& image, vector<Detection>& output);
 
-    void draw(Mat& image, const vector<Detection>& boxes);
-
-private:
-
-    size_t get_dim(const Dims& dims);
-
-    void postprocess(vector<Detection>& boxes);
+    void draw(Mat& image, const vector<Detection>& output);
 
 private:
 
-    vector<Scalar> colors;
-    vector<float*> gpu_buffers;          //!< The vector of device buffers needed for engine execution
-    vector<float*> cpu_buffers;
-    
-    int input_h;
-    int input_w;
-    int num_output_boxes;
-    int output_size;
-    const int MAX_INPUT_SIZE = 4096 * 4096;
-    float conf_threshold = 0.3;
-    float nms_threshold = 0.4;
-    
+    void postprocess(vector<Detection>& output);
+
+private:
+
+    float* gpu_buffers[2];               //!< The vector of device buffers needed for engine execution
+    float* cpu_output_buffer;
+
     cudaStream_t cuda_stream;
     IRuntime* runtime;                 //!< The TensorRT runtime used to deserialize the engine
     ICudaEngine* engine;               //!< The TensorRT engine used to run the network
     IExecutionContext* context;        //!< The context for executing inference using an ICudaEngine
+
+    // Model parameters
+    int model_input_w;
+    int model_input_h;
+    int num_detections;
+    int detection_attribute_size;
+    int num_classes = 80;
+    const int MAX_INPUT_SIZE = 4096 * 4096;
+    float conf_threshold = 0.3f;
+    float nms_threshold = 0.4f;
+
+    vector<Scalar> colors;
 };
