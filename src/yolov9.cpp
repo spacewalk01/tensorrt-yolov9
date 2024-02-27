@@ -114,12 +114,15 @@ Yolov9::Yolov9(string enginePath)
 
     delete[] serialized_engine;
 
-    
-    
-    mCpuBuffers = new float[binding_size];
-    cudaMalloc(&mGpuBuffers[i], mBufferBindingBytes[i]);
+    model_input_h = engine->getBindingDimensions(0).d[2];
+    model_input_w = engine->getBindingDimensions(0).d[3];
+    num_ouput_boxes = engine->getBindingDimensions(1).d[2];
+    ouput_size = engine->getBindingDimensions(1).d[1];
 
-    CUDA_CHECK(cudaStreamCreate(&mCudaStream));
+    cpu_buffer = new float[ouput_size * num_output_boxes];
+    cudaMalloc(&mGpuBuffers[i], 3 * model_input_w * model_input_h * sizeof(float));
+
+    CUDA_CHECK(cudaStreamCreate(&cuda_stream));
         
     cuda_preprocess_init(MAX_IMAGE_SIZE);
 
