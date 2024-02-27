@@ -8,7 +8,7 @@ cd yolov9
 pip install -r requirements.txt  
 ```
 
-3. Download [yolov9-c.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c.pt) model.
+3. Download [yolov9-c.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c.pt) or [yolov9-e.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-e.pt) model.
 4. Convert the model to onnx format:
 
 - Put `reparameterize.py` file to YOLOv9 installation folder and perform re-parameterization:
@@ -17,6 +17,8 @@ pip install -r requirements.txt
 python reparameterize.py yolov9-c.pt yolov9-c-param.pt
 ```
 
+- Or you can skip re-parameterization and downloaded re-parameterized models [yolov9-c-converted.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c-converted.pt) and [yolov9-e-converted.pt](https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-e-converted.pt).
+  
 - Export the model:
   
 ``` shell
