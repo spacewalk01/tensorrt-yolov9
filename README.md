@@ -1,5 +1,5 @@
 
-<h1 align="center"><span>YOLOv9-TensorRT</span></h1>
+<h1 align="center"><span>TensorRT-YOLOv9</span></h1>
 
  This repo hosts a C++ implementation of the [YOLOv9](https://github.com/WongKinYiu/yolov9) state of the art object detection model, leveraging the TensorRT API for efficient real-time inference.
 <p align="center" margin: 0 auto;>
