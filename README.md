@@ -30,11 +30,17 @@ Refer to our [docs/INSTALL.md](https://github.com/spacewalk01/tensorrt-yolov9/bl
    - OpenCV
 
 ## Examples
+
+Parameters for inference:
+
 ``` 
 Confidence threshold : 0.2
 NMS threshold : 0.3
 Model : yolov9-e (with FP32)
 ```
+
+Inference result:
+
 <p align="center" margin: 0 auto;>
   <img src="assets/street_o.jpg" /> 
 </p>
