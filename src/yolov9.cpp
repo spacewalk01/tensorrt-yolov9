@@ -141,7 +141,7 @@ Yolov9::~Yolov9()
     cudaStreamDestroy(cuda_stream);
     for (int i = 0; i < 2; i++)
         CUDA_CHECK(cudaFree(gpu_buffers[i]));
-    delete[] cpu_buffer;
+    delete[] cpu_output_buffer;
 
     // Destroy the engine
     cuda_preprocess_destroy();
@@ -159,7 +159,7 @@ void Yolov9::predict(Mat& image, vector<Detection> &output)
     cuda_preprocess(image.ptr(), image.cols, image.rows, gpu_buffers[0], model_input_w, model_input_h, cuda_stream);
 
     // Perform inference
-    context->enqueueV2(gpu_buffers, cuda_stream, nullptr);
+    context->enqueueV2((void**)gpu_buffers, cuda_stream, nullptr);
     CUDA_CHECK(cudaStreamSynchronize(cuda_stream));
 
     // Memcpy from device output buffer to host output buffer
@@ -208,8 +208,8 @@ void Yolov9::postprocess(vector<Detection>& output)
         Detection result;
         int idx = nms_result[i];
         result.class_id = class_ids[idx];
-        result.confidence = confidences[idx];
-        result.box = boxes[idx];
+        result.conf = confidences[idx];
+        result.bbox = boxes[idx];
         output.push_back(result);
     }
 }
@@ -222,7 +222,7 @@ void Yolov9::draw(Mat& image, const vector<Detection>& output)
     for (int i = 0; i < output.size(); i++)
     {
         auto detection = output[i];
-        auto box = detection.box;
+        auto box = detection.bbox;
         auto class_id = detection.class_id;
         auto conf = detection.conf;
 
