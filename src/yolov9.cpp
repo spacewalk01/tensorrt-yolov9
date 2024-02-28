@@ -83,9 +83,6 @@ Yolov9::~Yolov9()
     delete runtime;
 }
 
-//!
-//! \brief Runs the TensorRT inference engine for YOLOv9
-//!
 void Yolov9::predict(Mat& image, vector<Detection> &output)
 {
     // Preprocessing data on gpu
