@@ -88,6 +88,7 @@ void Yolov9::predict(Mat& image, vector<Detection> &output)
 {
     // Preprocessing data on gpu
     cuda_preprocess(image.ptr(), image.cols, image.rows, gpu_buffers[0], model_input_w, model_input_h, cuda_stream);
+    CUDA_CHECK(cudaStreamSynchronize(cuda_stream));
 
     // Perform inference
     context->enqueueV2((void**)gpu_buffers, cuda_stream, nullptr);
