@@ -44,7 +44,7 @@ Inference result:
 <p align="center" margin: 0 auto;>
   <img src="assets/street_o.jpg" /> 
 </p>
-Original image : https://www.flickr.com/photos/nicolelee/19041780
+Original image: https://www.flickr.com/photos/nicolelee/19041780
 
 ## 👏 Acknowledgement
 
