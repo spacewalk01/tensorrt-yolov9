@@ -29,7 +29,7 @@ Refer to our [docs/INSTALL.md](https://github.com/spacewalk01/tensorrt-yolov9/bl
    - CMake 3.14 or higher
    - OpenCV
 
-## Examples
+## 🌱 Examples
 
 Parameters for inference:
 
