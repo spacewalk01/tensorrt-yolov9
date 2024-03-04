@@ -22,7 +22,7 @@ yolov9-tensorrt.exe yolov9-c.engine test.mp4 # the video path
 
 Refer to our [docs/INSTALL.md](https://github.com/spacewalk01/tensorrt-yolov9/blob/main/docs/INSTALL.md) for detailed installation instructions.
 
-- **Cuda processing** : [main branch](https://github.com/spacewalk01/TensorRT-YOLOv9/tree/main)
+- **Cuda preprocessing** : [main branch](https://github.com/spacewalk01/TensorRT-YOLOv9/tree/main)
 - **Cpu preprocessing** : [cpu-preprocessing branch](https://github.com/spacewalk01/TensorRT-YOLOv9/tree/cpu_preprocessing)
   
 ## 🖥️ Requirement
