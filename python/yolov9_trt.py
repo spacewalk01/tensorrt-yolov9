@@ -14,8 +14,8 @@ import pycuda.autoinit
 import pycuda.driver as cuda
 import tensorrt as trt
 
-CONF_THRESH = 0.5
-IOU_THRESHOLD = 0.4
+CONF_THRESH = 0.3
+IOU_THRESHOLD = 0.2
 NUM_DETECTIONS = 8400
 LEN_ONE_RESULT = 84
 
@@ -35,7 +35,7 @@ def get_img_path_batches(batch_size, img_dir):
 def plot_one_box(x, img, color=None, label=None, line_thickness=None):
     """
     description: Plots one bounding box on image img,
-                 this function comes from YoLov5 project.
+                 this function comes from YoLov9 project.
     param: 
         x:      a box likes [x1,y1,x2,y2]
         img:    a opencv image object
@@ -164,7 +164,7 @@ class YoLov9TRT(object):
         self.ctx.pop()
         # Here we use the first row of output in that batch_size = 1
         output = host_outputs[0]
-        print("output shape: ", output.shape)
+        
         # Do postprocess
         for i in range(self.batch_size):
             result_boxes, result_scores, result_classid = self.post_process(
@@ -385,13 +385,13 @@ class YoLov9TRT(object):
 
 
 class inferThread(threading.Thread):
-    def __init__(self, yolov5_wrapper, image_path_batch):
+    def __init__(self, yolov9_wrapper, image_path_batch):
         threading.Thread.__init__(self)
-        self.yolov5_wrapper = yolov5_wrapper
+        self.yolov9_wrapper = yolov9_wrapper
         self.image_path_batch = image_path_batch
 
     def run(self):
-        batch_image_raw, use_time = self.yolov5_wrapper.infer(self.yolov5_wrapper.get_raw_image(self.image_path_batch))
+        batch_image_raw, use_time = self.yolov9_wrapper.infer(self.yolov9_wrapper.get_raw_image(self.image_path_batch))
         for i, img_path in enumerate(self.image_path_batch):
             parent, filename = os.path.split(img_path)
             save_name = os.path.join('output', filename)
@@ -401,25 +401,25 @@ class inferThread(threading.Thread):
 
 
 class warmUpThread(threading.Thread):
-    def __init__(self, yolov5_wrapper):
+    def __init__(self, yolov9_wrapper):
         threading.Thread.__init__(self)
-        self.yolov5_wrapper = yolov5_wrapper
+        self.yolov9_wrapper = yolov9_wrapper
 
     def run(self):
-        batch_image_raw, use_time = self.yolov5_wrapper.infer(self.yolov5_wrapper.get_raw_image_zeros())
+        batch_image_raw, use_time = self.yolov9_wrapper.infer(self.yolov9_wrapper.get_raw_image_zeros())
         print('warm_up->{}, time->{:.2f}ms'.format(batch_image_raw[0].shape, use_time * 1000))
 
 
+import argparse
+
+parser = argparse.ArgumentParser("yolov9")
+parser.add_argument('--engine', type=str, default="./yolov9-c.engine", help="engine file path")
+parser.add_argument('--data', type=str, default="images", help="images data path")
+args = parser.parse_args()
 
 if __name__ == "__main__":
-    # load custom plugin and engine
-    engine_file_path = "D:/Utils/TensorRT-8.6.0.12/bin/yolov9-c.engine"
-
-    if len(sys.argv) > 1:
-        engine_file_path = sys.argv[1]
 
     # load coco labels
-
     categories = ["person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
             "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
             "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
@@ -433,24 +433,23 @@ if __name__ == "__main__":
     if os.path.exists('output/'):
         shutil.rmtree('output/')
     os.makedirs('output/')
-    # a YoLov5TRT instance
-    yolov5_wrapper = YoLov9TRT(engine_file_path)
+    # a YoLov9TRT instance
+    yolov9_wrapper = YoLov9TRT(args.engine)
     try:
-        print('batch size is', yolov5_wrapper.batch_size)
+        print('batch size is', yolov9_wrapper.batch_size)
         
-        image_dir = "images/"
-        image_path_batches = get_img_path_batches(yolov5_wrapper.batch_size, image_dir)
+        image_path_batches = get_img_path_batches(yolov9_wrapper.batch_size, args.data)
 
         for i in range(10):
             # create a new thread to do warm_up
-            thread1 = warmUpThread(yolov5_wrapper)
+            thread1 = warmUpThread(yolov9_wrapper)
             thread1.start()
             thread1.join()
         for batch in image_path_batches:
             # create a new thread to do inference
-            thread1 = inferThread(yolov5_wrapper, batch)
+            thread1 = inferThread(yolov9_wrapper, batch)
             thread1.start()
             thread1.join()
     finally:
         # destroy the instance
-        yolov5_wrapper.destroy()
+        yolov9_wrapper.destroy()
