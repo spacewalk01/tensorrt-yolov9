@@ -9,7 +9,7 @@
 
 ## 🚀 Usage
 
-### C++
+#### C++
 
 ``` shell
 cd build/release
@@ -22,14 +22,25 @@ yolov9-tensorrt.exe yolov9-c.engine data
 yolov9-tensorrt.exe yolov9-c.engine test.mp4 # the video path
 ```
 
-### Python
+#### Python
 
 ``` shell
 cd python
 python yolov9_trt.py --engine yolov9-c.engine --data images --outdir output
 ```
 
-## 🛠️ Setup
+## 🛠️ Build
+
+#### Python
+
+The following command will install openvino python with the `ovc` api:
+
+``` shell
+cd python
+pip install -r requirement.txt
+```
+
+#### C++
 
 Refer to our [docs/INSTALL.md](https://github.com/spacewalk01/tensorrt-yolov9/blob/main/docs/INSTALL.md) for detailed installation instructions.
 
