@@ -9,6 +9,13 @@
 
 ## 🚀 Usage
 
+#### Python
+
+``` shell
+cd python
+python yolov9_trt.py --engine yolov9-c.engine --data images --outdir output
+```
+
 #### C++
 
 ``` shell
@@ -20,13 +27,6 @@ yolov9-tensorrt.exe yolov9-c.engine test.jpg
 yolov9-tensorrt.exe yolov9-c.engine data
 # infer a video
 yolov9-tensorrt.exe yolov9-c.engine test.mp4 # the video path
-```
-
-#### Python
-
-``` shell
-cd python
-python yolov9_trt.py --engine yolov9-c.engine --data images --outdir output
 ```
 
 ## 🛠️ Build
