@@ -12,14 +12,14 @@
 #### Python
 
 ``` shell
-cd python
+cd <this project path>/python
 python yolov9_trt.py --engine yolov9-c.engine --data images --outdir output
 ```
 
 #### C++
 
 ``` shell
-cd build/release
+cd <this project path>/build/release
 
 # infer an image
 yolov9-tensorrt.exe yolov9-c.engine test.jpg
