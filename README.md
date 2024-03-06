@@ -33,7 +33,7 @@ python yolov9_trt.py --engine yolov9-c.engine --data images --outdir output
 
 #### Python
 
-The following command will install openvino python with the `ovc` api:
+The following command will install trt python:
 
 ``` shell
 cd python
