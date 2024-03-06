@@ -9,7 +9,7 @@
 
 ## 🚀 Usage
 
-cpp:
+### C++
 
 ``` shell
 cd build/release
@@ -22,7 +22,7 @@ yolov9-tensorrt.exe yolov9-c.engine data
 yolov9-tensorrt.exe yolov9-c.engine test.mp4 # the video path
 ```
 
-python:
+### Python
 
 ``` shell
 cd python
