@@ -8,14 +8,16 @@ This repo hosts a Python implementation of the YOLOv9 state of the art object de
 
 Install the corresponding version of TensorRT API according to your system environment.
 ```bash
-git clone https://github.com/spacewalk01/TensorRT-YOLOv9.git
-cd TensorRT-YOLOv9/python
-pip install -r requirements.txt
+cd <tensorrt installation path>/python
+pip install cuda-python
+pip install tensorrt-8.6.0-cp310-none-win_amd64.whl
+pip install opencv-python
 ```
 
 ### Running
 
 ```bash
+cd <this project path>/python
 python yolov9_trt.py --engine <path to trt engine> --data <input dir> --outdir <outdir> 
 ```
 
