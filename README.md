@@ -36,8 +36,10 @@ yolov9-tensorrt.exe yolov9-c.engine test.mp4 # the video path
 The following command will install trt python:
 
 ``` shell
-cd python
-pip install -r requirement.txt
+cd <tensorrt installation path>/python
+pip install cuda-python
+pip install tensorrt-8.6.0-cp310-none-win_amd64.whl
+pip install opencv-python
 ```
 
 #### C++
