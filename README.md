@@ -33,7 +33,7 @@ yolov9-tensorrt.exe yolov9-c.engine test.mp4 # the video path
 
 #### Python
 
-The following command will install trt python:
+The following command will install tensorrt python:
 
 ``` shell
 cd <tensorrt installation path>/python
