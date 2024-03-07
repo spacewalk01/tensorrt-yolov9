@@ -1,7 +1,15 @@
+<div align="center">
 
-<h1 align="center"><span>TensorRT-YOLOv9</span></h1>
+TensorRT-YOLOv9
+===========================
 
- This repo hosts a C++ and python implementation of the [YOLOv9](https://github.com/WongKinYiu/yolov9) state of the art object detection model, leveraging the TensorRT API for efficient real-time inference.
+[![python](https://img.shields.io/badge/python-3.10.12-green)](https://www.python.org/downloads/release/python-31012/)
+[![cuda](https://img.shields.io/badge/cuda-11.6-green)](https://developer.nvidia.com/cuda-downloads)
+[![trt](https://img.shields.io/badge/TRT-8.6-green)](https://developer.nvidia.com/tensorrt)
+
+<div align="left">
+ 
+This repo hosts a C++ and python implementation of the [YOLOv9](https://github.com/WongKinYiu/yolov9) state of the art object detection model, leveraging the TensorRT API for efficient real-time inference.
 <p align="center" margin: 0 auto;>
   <img src="assets/traffic.gif" width="360px" />
   <img src="assets/parkinglot.gif" width="360px" /> 
