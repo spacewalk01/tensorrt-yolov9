@@ -41,8 +41,6 @@ trtexec.exe --onnx=yolov9-c-converted.onnx --explicitBatch --saveEngine=yolov9-c
 ```
 # Find and include OpenCV
 set(OpenCV_DIR "your path to OpenCV")
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
 
 # Set TensorRT path if not set in environment variables
 set(TENSORRT_DIR "your path to TensorRT")
