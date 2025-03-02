@@ -40,11 +40,16 @@ Yolov9::Yolov9(string engine_path)
     engine = runtime->deserializeCudaEngine(engineData.get(), modelSize);
     context = engine->createExecutionContext();
 
-    // Get input and output sizes of the model
-    model_input_h = engine->getBindingDimensions(0).d[2];
-    model_input_w = engine->getBindingDimensions(0).d[3];
-    detection_attribute_size = engine->getBindingDimensions(1).d[1];
-    num_detections = engine->getBindingDimensions(1).d[2];
+    // Query tensor shapes via explicit batch API:
+    const char* inName = engine->getIOTensorName(0);
+    nvinfer1::Dims dims_input = context->getTensorShape(inName);
+    model_input_h = dims_input.d[2];
+    model_input_w = dims_input.d[3];
+
+    const char* outName = engine->getIOTensorName(1);
+    nvinfer1::Dims dims_output = context->getTensorShape(outName);
+    detection_attribute_size = dims_output.d[1];
+    num_detections = dims_output.d[2];
     num_classes = detection_attribute_size - 4;
 
     // Initialize input buffers
@@ -90,8 +95,7 @@ void Yolov9::predict(Mat& image, vector<Detection> &output)
     cuda_preprocess(image.ptr(), image.cols, image.rows, gpu_buffers[0], model_input_w, model_input_h, cuda_stream);
     CUDA_CHECK(cudaStreamSynchronize(cuda_stream));
 
-    // Perform inference
-    context->enqueueV2((void**)gpu_buffers, cuda_stream, nullptr);
+    context->executeV2((void**)gpu_buffers);
 
     // Memcpy from device output buffer to host output buffer
     CUDA_CHECK(cudaMemcpyAsync(cpu_output_buffer, gpu_buffers[1], num_detections * detection_attribute_size * sizeof(float), cudaMemcpyDeviceToHost, cuda_stream));

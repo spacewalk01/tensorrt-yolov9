@@ -40,7 +40,7 @@ set(TENSORRT_DIR "your path to TensorRT")
 # Include TensorRT
 include_directories(${TENSORRT_DIR}/include)
 link_directories(${TENSORRT_DIR}/lib)
-set(TENSORRT_LIBS nvinfer nvinfer_plugin nvparsers nvonnxparser)
+set(TENSORRT_LIBS nvinfer_10 nvinfer_plugin_10 nvonnxparser_10)
 
 # Create an executable
 cuda_add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${CUDA_SOURCES})
